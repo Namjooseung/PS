@@ -1,34 +1,55 @@
 #include <bits/stdc++.h>
-#define fastio cin.tie(0)->sync_with_stdio(0)
 using namespace std;
 
-using i64 = long long;
+int N,K;
+long long bag_A_weight[5002]={0,};
+long long bag_B_weight[5002]={0,};
 
-auto get_dp = [](int n, const auto& p) {
-	vector dp(n + 1, 1LL << 60);
-	dp[0] = 0;
-	for (int i = 1; i <= n; i++) {
-		for (int j = i; j <= n; j++) {
-			i64 val = p[j] - p[i - 1];
-			dp[j - i + 1] = min(dp[j - i + 1], val);
-		}
-	}
-	return dp;
-};
+long long min_weight=LLONG_MAX;
 
-int main() {
-	fastio;
-	int n, k; cin >> n >> k;
-	vector a(n + 1, 0LL), b(n + 1, 0LL);
-	for (int i = 1; i <= n; i++) cin >> a[i], a[i] += a[i - 1];
-	for (int i = 1; i <= n; i++) cin >> b[i], b[i] += b[i - 1];
-	a = get_dp(n, a);
-	b = get_dp(n, b);
-	i64 res = 1LL << 60;
-	for (int i = 0; i <= n; i++) {
-		int j = 2 * n - k - i;
-		if (j < 0 || j > n) continue;
-		res = min(res, max(a[i], b[j]));
-	}
-	cout << res << '\n';
+long long FindMinWeight(int num,char bag){
+    long long min=LLONG_MAX;
+    if(bag=='A'){
+        for(int i=0;i+num<=N;i++){
+            long long sum=bag_A_weight[num+i]-bag_A_weight[i];
+            if(sum<min) min=sum;
+        }
+    }
+    else{
+        for(int i=0;i+num<=N;i++){
+            long long sum=bag_B_weight[num+i]-bag_B_weight[i];
+            if(sum<min) min=sum;
+        }
+    }
+    return min;
+}
+
+int main(){
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    cin>>N>>K;
+    int total_items=2*N-K;
+
+    long long tmp;
+    for(int i=0;i<N;i++){
+        cin>>tmp;
+        bag_A_weight[i+1]=bag_A_weight[i]+tmp;
+    }
+    for(int i=0;i<N;i++){
+        cin>>tmp;
+        bag_B_weight[i+1]=bag_B_weight[i]+tmp;
+    }
+
+    for(int i=0;i<=total_items;i++){
+        if(total_items-i>N || i>N) continue;
+        long long sum_A=FindMinWeight(total_items-i,'A');
+        long long sum_B=FindMinWeight(i,'B');
+        if(sum_A>sum_B){if(min_weight>sum_A) min_weight=sum_A;}
+        else{if(min_weight>sum_B) min_weight=sum_B;}
+    }
+
+    cout<<min_weight;
+
+    return 0;
 }
